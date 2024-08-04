@@ -1,74 +1,27 @@
-library(car)
-library(tidymodels)
-library(tidyr)
-library(visdat)
-setwd("C:/Users/singh/OneDrive/Desktop/project 1")
-re_train=read.csv("housing_train (1).csv")
-re_test=read.csv("housing_test (1).csv")
-#re_test$Price=NA
-#re_test$data='test'
-#re_train$data='train'
+**Problem Statement & Other Instructions**
+Part 1 score should be grater than 7
+Part 2 score should be greater than 0.51
 
-cor.test(x=re_train$Rooms,y=re_train$Bathroom)
+**Part 1**
+Part 1 of the project contains a quiz which is present in the section 'submit your part 1 solution here'. There are 10 questions of 1 mark each and you need to score atleast 7 out of 10 in order to pass the quiz i.e. to pass part 1 of the project.
 
+**Part 2**
+Price of a property is one of the most important decision criterion when people buy homes. Real state firms need to be consistent in their pricing in order to attract buyers . Having a predictive model for the same will be great tool to have , which in turn can also be used to tweak development of properties , putting more emphasis on qualities which increase the value of the property.
 
-glimpse(re_train)
+We have given you two datasets , housing_train.csv and housing_test.csv . You need to use data housing_train to build predictive model for response variable "Price". Housing_test data contains all other factors except "Price", you need to predict that using the model that you developed and submit your predicted values in a csv files.
 
-func_year=function(x){
-  x=2022-x
-  return(x)
-}
+Evaluation Criterion : 
+Score will be calculated as:
+Score = 212467/RMSE (Note : Dont worry about change in scoring method , this is just a cosmetic change to alter scale of score , passing criterion hasn't changed and you dont need to resubmit )
+Where RMSE is root mean square error on test file. 
 
-
-dp_pipe=recipe(Price~.,data = re_train)%>%
-  update_role(Address,Bedroom2,new_role = "drop_vars")%>%
-  step_rm(has_role("drop_vars"))%>%
-  
- 
-  update_role(Suburb,Method,Type,SellerG,
-              CouncilArea,new_role =  "to_dummies")%>%
-   
-  step_other(has_role("to_dummies"),threshold =0.02,other="__other__") %>%
-  step_dummy(has_role("to_dummies"))%>%
-  step_mutate_at(YearBuilt,fn=func_year)%>%
-  step_impute_median(all_numeric(),-all_outcomes())
-
-dp_pipe=prep(dp_pipe)
-
-
-
-train=bake(dp_pipe,new_data = NULL)
-test=bake(dp_pipe,new_data=re_test)
-
-colSums(is.na(re_train))
-
-
-set.seed(2)
-s=sample(1:nrow(train),0.8*nrow(train))
-t1=train[s,]
-t2=train[-s,]
-fit=lm(Price~.,data=t1)
-summary(fit)
-sort(vif(fit),decreasing = T)
-fit=stats::step(fit)
-formula(fit)
-
-fit_final=lm(Price ~ Rooms + Distance + Postcode + Bathroom + Car + Landsize + 
-               BuildingArea + YearBuilt + Suburb_Reservoir + Suburb_Richmond + 
-               Type_t + Type_u + Method_S + Method_SP +  
-               SellerG_Biggin + SellerG_hockingstuart + SellerG_Jellis + 
-               SellerG_Marshall  + SellerG_X__other__ + CouncilArea_Banyule + 
-               CouncilArea_Bayside + CouncilArea_Boroondara + CouncilArea_Brimbank + 
-               CouncilArea_Darebin + CouncilArea_Glen.Eira + 
-               CouncilArea_Manningham + CouncilArea_Maribyrnong + CouncilArea_Melbourne + 
-               CouncilArea_Moonee.Valley + CouncilArea_Moreland + CouncilArea_Port.Phillip + 
-                CouncilArea_Yarra + CouncilArea_X__other__,data = t1)
-summary(fit_final)
-
-t2.pred=predict(fit_final,newdata=t2)
-
+Please read through the points given below before you begin : 
+1. Your score for test data should come out to be more than 0.51
+2. You are NOT required to submit R script. However in some cases , we might ask you to send your script separately in order to verify that your submissions is a result of models that you built .
+3. you can submit as many times as you want, we'll put best score obtained on the respective leader board. 
+4. Your predictions should not contain any NA values.
+5. You are are free to use any predictive modelling technique
 errors=t2$Price-t2.pred
-
 rmse=errors**2 %>% mean() %>% sqrt()
 Score = 212467/rmse
 Score
